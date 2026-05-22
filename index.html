@@ -50,6 +50,12 @@
             <textarea id="spesifikasi" class="form-control" placeholder="Contoh: Core i5, RAM 8GB, 500GB SSD" required></textarea>
         </div>
 
+        <!-- Tambahan Kolom Jumlah -->
+        <div class="form-group">
+            <label for="jumlah">Jumlah Barang</label>
+            <input type="number" id="jumlah" class="form-control" placeholder="Contoh: 10" min="1" value="1" required>
+        </div>
+
         <div class="form-group">
             <label for="kondisi">Kondisi / Kerusakan</label>
             <select id="kondisi" class="form-control" required>
@@ -79,10 +85,8 @@
 </div>
 
 <script>
-    // URL Web App Anda yang sudah diperbaiki penulisannya
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFLhB10EjwbBTvrJD-dOMo-B1Ozw2p1RTufrbg89YAhrq3W0lqa29uUwSXShEvESCe/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQvWmSr2vYyqqoUvrd5dwu2yiY0GBU0GW11vKxM2HYCgT1BqDqGUzOQLXPf_Wun_XL/exec";
 
-    // Fungsi untuk mengambil data dari Sheet 2 (Pengaturan) saat halaman dibuka
     document.addEventListener("DOMContentLoaded", function() {
         const btnSubmit = document.getElementById('submitBtn');
         const selBarang = document.getElementById('namaBarang');
@@ -113,16 +117,11 @@
                 }
             })
             .catch(error => {
-                console.error("Gagal terhubung ke server:", error);
-                selBarang.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
-                selMerek.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
-                selKondisi.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
-                selLab.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
-                alert("Gagal memuat pengaturan. Pastikan Anda sudah mendeploy Apps Script ke VERSI BARU.");
+                console.error("Gagal terhubung:", error);
+                alert("Gagal memuat pengaturan.");
             });
     });
 
-    // Fungsi untuk mengirim Data saat tombol diklik
     document.getElementById('inventoryForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
@@ -142,6 +141,7 @@
                 namaBarang: document.getElementById('namaBarang').value,
                 merek: document.getElementById('merek').value,
                 spesifikasi: document.getElementById('spesifikasi').value,
+                jumlah: document.getElementById('jumlah').value, // Mengambil input Jumlah
                 kondisi: document.getElementById('kondisi').value,
                 namaLab: document.getElementById('namaLab').value,
                 catatan: document.getElementById('catatan').value, 
@@ -168,7 +168,7 @@
             })
             .catch(error => {
                 statusAlert.className = "alert error";
-                statusAlert.innerText = "Terjadi kegagalan transmisi data. Cek koneksi Anda.";
+                statusAlert.innerText = "Terjadi kegagalan transmisi data.";
             })
             .finally(() => {
                 submitBtn.disabled = false;
