@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Inventarisasi Laboratorium</title>
+    <style>
+        :root { --bg-body: #f5f7fa; --bg-card: #ffffff; --text-main: #2d3748; --border-color: #cbd5e0; --primary-color: #2b579a; --primary-hover: #1e3d70; --success-bg: #c6f6d5; --success-text: #22543d; --error-bg: #fed7d7; --error-text: #742a2a; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .form-container { background-color: var(--bg-card); padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); width: 100%; max-width: 550px; }
+        h2 { text-align: center; margin-top: 0; margin-bottom: 25px; color: var(--primary-color); font-weight: 600; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; background-color: #fff; }
+        .form-control:focus { border-color: var(--primary-color); outline: none; }
+        textarea.form-control { resize: vertical; height: 75px; }
+        select.form-control { cursor: pointer; }
+        .btn-submit { background-color: var(--primary-color); color: #ffffff; border: none; padding: 12px; width: 100%; font-size: 15px; font-weight: 600; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
+        .btn-submit:hover { background-color: var(--primary-hover); }
+        .btn-submit:disabled { background-color: #a0aec0; cursor: not-allowed; }
+        .alert { padding: 12px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; text-align: center; display: none; }
+        .alert.success { background-color: var(--success-bg); color: var(--success-text); display: block; }
+        .alert.error { background-color: var(--error-bg); color: var(--error-text); display: block; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Input Inventaris Ruang LAB</h2>
+    
+    <div id="statusAlert" class="alert"></div>
+
+    <form id="inventoryForm">
+        <div class="form-group">
+            <label for="namaBarang">Nama Barang</label>
+            <select id="namaBarang" class="form-control" required>
+                <option value="" disabled selected>Memuat data...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="merek">Merek</label>
+            <select id="merek" class="form-control" required>
+                <option value="" disabled selected>Memuat data...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="spesifikasi">Spesifikasi</label>
+            <textarea id="spesifikasi" class="form-control" placeholder="Contoh: Core i5, RAM 8GB, 500GB SSD" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="kondisi">Kondisi / Kerusakan</label>
+            <select id="kondisi" class="form-control" required>
+                <option value="" disabled selected>Memuat data...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="namaLab">Nama LAB</label>
+            <select id="namaLab" class="form-control" required>
+                <option value="" disabled selected>Memuat data...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="gambar">Foto Barang</label>
+            <input type="file" id="gambar" class="form-control" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+            <label for="catatan">Catatan (Opsional)</label>
+            <textarea id="catatan" class="form-control" placeholder="Masukkan keterangan tambahan jika ada..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit" disabled>Menghubungkan ke server...</button>
+    </form>
+</div>
+
+<script>
+    // URL Web App Anda yang sudah diperbaiki penulisannya
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFLhB10EjwbBTvrJD-dOMo-B1Ozw2p1RTufrbg89YAhrq3W0lqa29uUwSXShEvESCe/exec";
+
+    // Fungsi untuk mengambil data dari Sheet 2 (Pengaturan) saat halaman dibuka
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnSubmit = document.getElementById('submitBtn');
+        const selBarang = document.getElementById('namaBarang');
+        const selMerek = document.getElementById('merek');
+        const selKondisi = document.getElementById('kondisi');
+        const selLab = document.getElementById('namaLab');
+
+        fetch(APPS_SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    selBarang.innerHTML = '<option value="" disabled selected>-- Pilih Nama Barang --</option>';
+                    data.namaBarang.forEach(item => selBarang.innerHTML += `<option value="${item}">${item}</option>`);
+
+                    selMerek.innerHTML = '<option value="" disabled selected>-- Pilih Merek --</option>';
+                    data.merek.forEach(item => selMerek.innerHTML += `<option value="${item}">${item}</option>`);
+
+                    selKondisi.innerHTML = '<option value="" disabled selected>-- Pilih Kondisi / Kerusakan --</option>';
+                    data.kondisi.forEach(item => selKondisi.innerHTML += `<option value="${item}">${item}</option>`);
+
+                    selLab.innerHTML = '<option value="" disabled selected>-- Pilih Nama LAB --</option>';
+                    data.namaLab.forEach(item => selLab.innerHTML += `<option value="${item}">${item}</option>`);
+
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = "Simpan ke Inventaris";
+                } else {
+                    alert("Pesan dari Server: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Gagal terhubung ke server:", error);
+                selBarang.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
+                selMerek.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
+                selKondisi.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
+                selLab.innerHTML = '<option value="" disabled selected>Gagal terhubung ke server</option>';
+                alert("Gagal memuat pengaturan. Pastikan Anda sudah mendeploy Apps Script ke VERSI BARU.");
+            });
+    });
+
+    // Fungsi untuk mengirim Data saat tombol diklik
+    document.getElementById('inventoryForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const statusAlert = document.getElementById('statusAlert');
+        const fileInput = document.getElementById('gambar');
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Memproses & Mengunggah Data...";
+        statusAlert.style.display = "none";
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const payload = {
+                namaBarang: document.getElementById('namaBarang').value,
+                merek: document.getElementById('merek').value,
+                spesifikasi: document.getElementById('spesifikasi').value,
+                kondisi: document.getElementById('kondisi').value,
+                namaLab: document.getElementById('namaLab').value,
+                catatan: document.getElementById('catatan').value, 
+                fileName: file.name,
+                fileType: file.type,
+                fileData: e.target.result
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status === "success") {
+                    statusAlert.className = "alert success";
+                    statusAlert.innerText = result.message;
+                    document.getElementById('inventoryForm').reset();
+                } else {
+                    statusAlert.className = "alert error";
+                    statusAlert.innerText = "Gagal menyimpan: " + result.message;
+                }
+            })
+            .catch(error => {
+                statusAlert.className = "alert error";
+                statusAlert.innerText = "Terjadi kegagalan transmisi data. Cek koneksi Anda.";
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Simpan ke Inventaris";
+            });
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+</body>
+</html>
